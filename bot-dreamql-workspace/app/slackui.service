@@ -1,0 +1,16 @@
+[Unit]
+Description=DreamQL Workspace (Slack-style)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=promptql
+WorkingDirectory=/workspace/slackapp
+# Replaced at install time with the VM's $PROMPTQL_PLATFORM_API_URL (see BOT.md, Step 1).
+Environment=PROMPTQL_PLATFORM_API_URL=__PROMPTQL_PLATFORM_API_URL__
+ExecStart=/usr/local/bin/uv run app.py
+Restart=always
+RestartSec=2
+
+[Install]
+WantedBy=multi-user.target
