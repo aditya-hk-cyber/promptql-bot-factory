@@ -10,13 +10,15 @@ None.
 
 The reference implementation is in `app/` of this directory. Deploy it as-is; do not rewrite or edit `app.py` or `index.html`.
 
+The composer features are plug-in modules that load on top of the core: `app/ext_*.py` (backend routes, loaded by `app.py`) and `app/static/*.js|css` (loaded into the page by the core). Deploy them with the core and do not edit them either.
+
 Never put the VM's `$PROMPTQL_USER_JWT` into the app or the unit: it expires and acts as the wrong person. The app only uses the `X-PromptQL-Visitor-Token` from the request it is handling.
 
 ## Step 1 — Deploy on the VM
 
 ```sh
 mkdir -p /workspace/slackapp && cd /workspace/slackapp
-# copy app.py, index.html, slackui.service and publish.sh from this directory's app/
+# copy everything in this directory's app/ (app.py, index.html, ext_*.py, static/, slackui.service, publish.sh), keeping the layout
 sed "s|__PROMPTQL_PLATFORM_API_URL__|$PROMPTQL_PLATFORM_API_URL|" slackui.service | sudo tee /etc/systemd/system/slackui.service >/dev/null
 sudo systemctl daemon-reload && sudo systemctl enable --now slackui.service
 ```
@@ -28,6 +30,8 @@ sudo systemctl daemon-reload && sudo systemctl enable --now slackui.service
 1. `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/readyz` → `204`.
 2. `curl -s http://127.0.0.1:8080/api/bootstrap` → empty data (anonymous gets nothing, never an error).
 3. `grep -c PROMPTQL_USER_JWT /etc/systemd/system/slackui.service` → `0`.
+4. `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/api/mybots` → `401`. The same goes for `/api/groups`: anonymous callers are refused.
+5. `curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8080/static/nav.js` → `200`.
 
 ## Step 3 — Publish
 

@@ -1,0 +1,17 @@
+/* mention module: @ autocomplete popup + chip-like tokens in the composer */
+.composer{position:relative}
+.dqm-wrap{position:relative}
+.dqm-wrap>textarea.in{position:relative;z-index:1;background:transparent}
+.dqm-ov{position:absolute;top:0;left:0;right:0;bottom:0;z-index:0;margin:0;box-sizing:border-box;overflow:hidden;pointer-events:none;white-space:pre-wrap;overflow-wrap:break-word;word-wrap:break-word;color:transparent}
+.dqm-chip{color:transparent;background:rgba(29,155,209,.22);border-radius:3px;box-shadow:0 0 0 1px rgba(29,155,209,.5)}
+.dqm-chip.bot{background:rgba(196,162,232,.22);box-shadow:0 0 0 1px rgba(196,162,232,.55)}
+.dqm-pop{position:absolute;left:8px;bottom:calc(100% + 4px);width:min(360px,calc(100% - 16px));max-height:300px;overflow-y:auto;background:#1f2125;border:1px solid #4a4c50;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.55);z-index:45;padding:4px 0;display:none}
+.dqm-pop.open{display:block}
+.dqm-h{font-size:12px;color:#9a9b9e;padding:4px 12px 6px}
+.dqm-it{display:flex;align-items:center;gap:8px;padding:5px 12px;cursor:pointer;color:#d1d2d3;font-size:14px}
+.dqm-it.on{background:#1264a3;color:#fff}
+.dqm-f{width:22px;height:22px;border-radius:5px;font-size:9px;flex:0 0 22px}
+.dqm-g{width:22px;height:22px;border-radius:5px;flex:0 0 22px;display:inline-flex;align-items:center;justify-content:center;background:#5e5f62;color:#fff;font-weight:800;font-size:12px}
+.dqm-n{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dqm-s{margin-left:auto;padding-left:8px;font-size:12px;opacity:.7;white-space:nowrap}
+.dqm-it.on .dqm-s{opacity:.9}

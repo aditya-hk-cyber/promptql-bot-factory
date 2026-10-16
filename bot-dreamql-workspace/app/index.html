@@ -144,6 +144,10 @@ svg.i{vertical-align:-3px;flex:0 0 auto}.tab svg.i{vertical-align:-2px}.rail .me
 .modal .imgbox{flex:1;display:flex;align-items:center;justify-content:center;background:#111;overflow:auto}
 .modal .imgbox img{max-width:100%;max-height:100%}
 </style>
+<style id="dq-core-v2">
+.composer .tb .tl{background:none;border:0;color:inherit;cursor:pointer;padding:2px 5px;border-radius:4px;font:inherit;line-height:1}
+.composer .tb .tl:hover,.composer .tb .tl.on{background:#ffffff1a;color:#fff}
+</style>
 </head>
 <body>
 <div id="shell">
@@ -197,6 +201,18 @@ function paintIcons(root){(root||document).querySelectorAll("[data-ic]").forEach
 const COLORS=["#e8912d","#2bac76","#1264a3","#cd2553","#7c3085","#1d9bd1","#d4a017","#b0532c","#3a7d44","#5b5bd6"];
 const BOT="DreamBot";
 const S={boot:null,filter:"all",room:null,roomData:null,tab:"messages",thread:null,newFrom:null};
+/* ---------- DQ plug-in bus (core v2) — modules attach here, never edit this file ---------- */
+const DQ=window.DQ={version:2,hooks:{},tools:{},
+  on(ev,fn){(this.hooks[ev]=this.hooks[ev]||[]).push(fn)},
+  emit(ev,p){(this.hooks[ev]||[]).forEach(f=>{try{f(p)}catch(e){console.warn("DQ hook",ev,e)}});return p},
+  async pipe(ev,p){for(const f of (this.hooks[ev]||[])){try{const r=await f(p);if(r)p=r}catch(e){console.warn("DQ pipe",ev,e)}}return p},
+  tool(name,fn){this.tools[name]=fn}};
+function toolbarHtml(){const b=(t,title,inner)=>`<button type="button" class="tl" data-tool="${t}" title="${title}" aria-label="${title}">${inner}</button>`;
+  return b("plus","Attach",ic("plus"))+b("format","Formatting","Aa")+b("emoji","Emoji",ic("smile"))+b("mention","Mention someone","@")+b("mic","Dictate",ic("mic"))+b("slash","Shortcuts","/")}
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest("[data-tool]");if(!b)return;e.preventDefault();
+  const c=b.closest(".composer"),input=c&&c.querySelector("textarea"),kind=input&&input.id==="tin"?"thread":"room";
+  const fn=DQ.tools[b.dataset.tool];if(fn){try{fn({button:b,composer:c,input,kind})}catch(x){console.warn("DQ tool",x)}}else toast("Coming soon")});
+
 const $=id=>document.getElementById(id);
 function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function color(s){let h=0;for(const c of String(s||""))h=(h*31+c.charCodeAt(0))>>>0;return COLORS[h%COLORS.length]}
@@ -253,7 +269,7 @@ function renderSide(){
   let html="";
   if(S.filter==="dms")html=sec("s-dm","Direct messages",dm);
   else html=sec("s-dm","Direct messages",dm)+sec("s-ch","Channels",ch);
-  $("list").innerHTML=html;
+  $("list").innerHTML=html;DQ.emit("side:render",{list:$("list")});
   const tot=b.channels.concat(b.dms).reduce((a,r)=>a+roomUnread(r),0);
   $("rb-act").style.display=tot?"block":"none";$("rb-act").textContent=tot;
   document.title=(tot?`(${tot}) `:"")+"DreamQL";
@@ -298,7 +314,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal();if($("
 /* ---------- channel / DM view ---------- */
 async function openRoom(id,keepScroll){
   if(S.room!==id){S.tab="messages";closeThread()}
-  S.room=id;renderSide();
+  S.room=id;renderSide();DQ.emit("nav:open",{type:"room",id,refresh:!!keepScroll});
   const r=allRooms().find(x=>x.room_id===id);
   if(!keepScroll)$("pane").innerHTML=headerHtml(r)+`<div class="feed"><div class="blank"><span class="spin"></span></div></div>`;
   let data;try{data=await api("/api/room/"+id)}catch(e){$("pane").innerHTML=headerHtml(r)+`<div class="blank">Couldn't load this conversation (${e.message}).</div>`;return}
@@ -343,8 +359,8 @@ function renderPane(keepScroll){
           <span class="rc">${t.reply_count?t.reply_count+" "+(t.reply_count===1?"reply":"replies"):"View thread"}</span>
           <span class="lr">Last reply ${esc(ago(t.last_reply_at))}</span><span class="vt">View thread ›</span></div></div></div>`}).join("")}
   $("pane").innerHTML=headerHtml(r)+`<div class="feed" id="feed">${body}</div>`+
-    (S.tab==="messages"?`<div class="composer"><textarea class="in" id="cin" rows="1" placeholder="Message ${esc(label)}" onkeydown="ckey(event,'room')" oninput="grow(this)"></textarea><div class="tb"><span>${ic("plus")}</span><span>Aa</span><span>${ic("smile")}</span><span>@</span><span>${ic("video")}</span><span>${ic("mic")}</span><span>/</span><button class="snd" id="csnd" onclick="send('room')" title="Send">${ic("send")}</button></div></div><div class="ro">Enter to send · Shift+Enter for a new line · posting here starts a new thread · tag @DreamBot to bring the bot in</div>`:"");
-  const feed=$("feed");hydrate(feed);if($("cin")&&draft){$("cin").value=draft;grow($("cin"))}if(hadFocus&&$("cin"))$("cin").focus();
+    (S.tab==="messages"?`<div class="composer"><textarea class="in" id="cin" rows="1" placeholder="Message ${esc(label)}" onkeydown="ckey(event,'room')" oninput="grow(this)"></textarea><div class="tb">${toolbarHtml()}<button class="snd" id="csnd" onclick="send('room')" title="Send">${ic("send")}</button></div></div><div class="ro">Enter to send · Shift+Enter for a new line · posting here starts a new thread · tag @DreamBot to bring the bot in</div>`:"");
+  const feed=$("feed");hydrate(feed);if($("cin"))DQ.emit("composer:mount",{kind:"room",input:$("cin"),composer:$("cin").closest(".composer")});if($("cin")&&draft){$("cin").value=draft;grow($("cin"))}if(hadFocus&&$("cin"))$("cin").focus();
   if(keepScroll&&!atBottom){feed.scrollTop=prevTop}
   else{const nl=feed.querySelector(".newline");if(nl&&!keepScroll)nl.scrollIntoView({block:"center"});else feed.scrollTop=feed.scrollHeight}
   searchFeed($("search").value);
@@ -358,7 +374,8 @@ async function openThread(tid){
   const t=(S.roomData&&S.roomData.threads.find(x=>x.thread_id===tid))||{title:""};
   const r=S.room?allRooms().find(x=>x.room_id===S.room):null;
   const where=r?(r.kind==="dm"?esc(dmLabel(r)):(r.visibility==="public"?"# ":ic("lock",13)+" ")+esc(r.name)):"";
-  tp.innerHTML=`<div class="tph"><span class="t">Thread</span><span class="s">${where}</span><a href="${esc(t.url||"#")}" target="_blank" rel="noopener">Open in PromptQL ↗</a><button class="x" onclick="closeThread()">×</button></div><div class="feed" id="tfeed"><div class="blank"><span class="spin"></span></div></div><div class="composer"><textarea class="in" id="tin" rows="1" placeholder="Reply…" onkeydown="ckey(event,'thread')" oninput="grow(this)"></textarea><div class="tb"><span>${ic("plus")}</span><span>Aa</span><span>${ic("smile")}</span><span>@</span><button class="snd" onclick="send('thread')" title="Send">${ic("send")}</button></div></div><div class="ro">Enter to send · tag @DreamBot to get the bot to respond</div>`;
+  tp.innerHTML=`<div class="tph"><span class="t">Thread</span><span class="s">${where}</span><a href="${esc(t.url||"#")}" target="_blank" rel="noopener">Open in PromptQL ↗</a><button class="x" onclick="closeThread()">×</button></div><div class="feed" id="tfeed"><div class="blank"><span class="spin"></span></div></div><div class="composer"><textarea class="in" id="tin" rows="1" placeholder="Reply…" onkeydown="ckey(event,'thread')" oninput="grow(this)"></textarea><div class="tb">${toolbarHtml()}<button class="snd" onclick="send('thread')" title="Send">${ic("send")}</button></div></div><div class="ro">Enter to send · tag @DreamBot to get the bot to respond</div>`;
+  DQ.emit("composer:mount",{kind:"thread",input:$("tin"),composer:$("tin").closest(".composer")});DQ.emit("nav:open",{type:"thread",id:tid,room:S.room});
   await loadThread(tid);setTimeout(()=>$("tin")&&$("tin").focus(),50)}
 async function loadThread(tid,keep){
   const tf0=$("tfeed");const tTop=tf0?tf0.scrollTop:0,tBottom=tf0?tf0.scrollHeight-tf0.scrollTop-tf0.clientHeight<40:true;
@@ -386,17 +403,20 @@ function closeThread(){S.thread=null;$("tp").classList.remove("open");$("tp").in
 
 function toast(m,ok){const t=$("toast");t.textContent=m;t.className="toast"+(ok?" ok":"");t.style.display="block";clearTimeout(t._h);t._h=setTimeout(()=>t.style.display="none",ok?2500:6000)}
 function grow(el){el.style.height="auto";el.style.height=Math.min(el.scrollHeight,200)+"px";const b=el.closest(".composer").querySelector(".snd");if(b)b.classList.toggle("go",!!el.value.trim())}
-function ckey(e,k){if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();send(k)}}
+function ckey(e,k){for(const f of (DQ.hooks["composer:key"]||[])){try{if(f(e,k)===true)return}catch(x){console.warn("DQ key",x)}}if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){e.preventDefault();send(k)}}
 async function postJSON(u,b){const r=await fetch(u,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(b)});const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j}
 async function syncSeen(items){try{await postJSON("/api/seen",{items})}catch(e){console.warn("read sync",e)}}
 async function send(kind){
-  const el=$(kind==="room"?"cin":"tin");if(!el)return;const text=el.value.trim();if(!text||el.disabled)return;
+  const el=$(kind==="room"?"cin":"tin");if(!el)return;const text=el.value.trim();if((!text&&!el.dataset.attach)||el.disabled)return;
   const tz=Intl.DateTimeFormat().resolvedOptions().timeZone;el.disabled=true;
   try{
-    if(kind==="room"){const room=S.room;const j=await postJSON(`/api/room/${room}/post`,{text,timezone:tz});el.value="";
-      if(j.bot_triggered)S.botUntil=Date.now()+180000;await openRoom(room,false);if(j.thread_id)openThread(j.thread_id)}
-    else{const j=await postJSON(`/api/thread/${S.thread}/reply`,{text,timezone:tz});el.value="";grow(el);
-      if(j.bot_triggered)S.botUntil=Date.now()+180000;await loadThread(S.thread,false)}
+    const p=await DQ.pipe("send:before",{kind,text,uploads:[],room:S.room,thread:kind==="thread"?S.thread:null,thread_id:null,timezone:tz,input:el});
+    const body={text:p.text||"",timezone:tz};if(p.uploads&&p.uploads.length)body.uploads=p.uploads;
+    if(kind==="room"&&!p.thread_id){const room=S.room;const j=await postJSON(`/api/room/${room}/post`,body);el.value="";delete el.dataset.attach;
+      if(j.bot_triggered)S.botUntil=Date.now()+180000;DQ.emit("send:after",{kind,result:j});await openRoom(room,false);if(j.thread_id)openThread(j.thread_id)}
+    else{const tid=p.thread_id||S.thread;const j=await postJSON(`/api/thread/${tid}/reply`,body);el.value="";delete el.dataset.attach;grow(el);
+      if(j.bot_triggered)S.botUntil=Date.now()+180000;DQ.emit("send:after",{kind,result:j});
+      if(kind==="room"){await openRoom(S.room,false);openThread(tid)}else await loadThread(S.thread,false)}
   }catch(e){toast("Couldn't send: "+e.message)}
   finally{const e2=$(kind==="room"?"cin":"tin");if(e2){e2.disabled=false;e2.focus()}}
 }
@@ -406,10 +426,12 @@ setInterval(()=>{if(!document.hidden&&S.thread&&Date.now()<(S.botUntil||0))loadT
 /* ---------- boot + live sync ---------- */
 async function loadBoot(){const b=await api("/api/bootstrap");
   if(b.anonymous){$("list").innerHTML=`<div class="empty-s" style="padding:16px">Open this app from PromptQL to see your workspace.</div>`;return false}
-  S.boot=b;$("meFace").innerHTML=face(b.me.name||"Me","face","width:36px;height:36px;font-size:13px");renderSide();return true}
+  S.boot=b;DQ.emit("boot:loaded",b);$("meFace").innerHTML=face(b.me.name||"Me","face","width:36px;height:36px;font-size:13px");renderSide();return true}
 async function refreshAll(){try{await loadBoot();if(S.room)await openRoom(S.room,true);if(S.thread)await loadThread(S.thread,true)}catch(e){}}
-(async()=>{paintIcons();try{if(await loadBoot()){const first=S.boot.dms[0]||S.boot.channels[0];if(first)openRoom(first.room_id)}}catch(e){$("list").innerHTML=`<div class="empty-s" style="padding:16px">Couldn't load (${esc(e.message)}). If prompted, approve the app's access and reload.</div>`}
-  setInterval(()=>{if(!document.hidden)refreshAll()},30000)})();
+typeof S!=="undefined"&&(DQ.S=S);typeof esc!=="undefined"&&(DQ.esc=esc);typeof api!=="undefined"&&(DQ.api=api);typeof postJSON!=="undefined"&&(DQ.postJSON=postJSON);typeof toast!=="undefined"&&(DQ.toast=toast);typeof grow!=="undefined"&&(DQ.grow=grow);typeof ic!=="undefined"&&(DQ.ic=ic);typeof face!=="undefined"&&(DQ.face=face);typeof md!=="undefined"&&(DQ.md=md);typeof hydrate!=="undefined"&&(DQ.hydrate=hydrate);typeof allRooms!=="undefined"&&(DQ.allRooms=allRooms);typeof dmLabel!=="undefined"&&(DQ.dmLabel=dmLabel);typeof openRoom!=="undefined"&&(DQ.openRoom=openRoom);typeof openThread!=="undefined"&&(DQ.openThread=openThread);typeof loadThread!=="undefined"&&(DQ.loadThread=loadThread);typeof closeThread!=="undefined"&&(DQ.closeThread=closeThread);typeof renderSide!=="undefined"&&(DQ.renderSide=renderSide);typeof renderPane!=="undefined"&&(DQ.renderPane=renderPane);typeof syncSeen!=="undefined"&&(DQ.syncSeen=syncSeen);typeof markSeen!=="undefined"&&(DQ.markSeen=markSeen);typeof seenMap!=="undefined"&&(DQ.seenMap=seenMap);typeof isUnread!=="undefined"&&(DQ.isUnread=isUnread);typeof send!=="undefined"&&(DQ.send=send);typeof showTab!=="undefined"&&(DQ.showTab=showTab);typeof setFilter!=="undefined"&&(DQ.setFilter=setFilter);typeof refreshAll!=="undefined"&&(DQ.refreshAll=refreshAll);typeof loadBoot!=="undefined"&&(DQ.loadBoot=loadBoot);typeof ago!=="undefined"&&(DQ.ago=ago);typeof tm!=="undefined"&&(DQ.tm=tm);
+window.addEventListener("DOMContentLoaded",async()=>{paintIcons();try{if(await loadBoot()){const first=S.boot.dms[0]||S.boot.channels[0];if(first)openRoom(first.room_id)}}catch(e){$("list").innerHTML=`<div class="empty-s" style="padding:16px">Couldn't load (${esc(e.message)}). If prompted, approve the app's access and reload.</div>`}
+  setInterval(()=>{if(!document.hidden)refreshAll()},30000)});
 </script>
+<!--DQ_MODULES-->
 </body>
 </html>

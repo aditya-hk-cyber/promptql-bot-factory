@@ -1,0 +1,42 @@
+/* DreamQL Workspace module: emoji (Slack dark theme) */
+.dqe-pop{position:fixed;z-index:70;width:362px;height:440px;display:flex;flex-direction:column;background:#1a1d21;border:1px solid #3d3f43;border-radius:10px;box-shadow:0 0 0 1px #00000026,0 12px 32px #000a;color:#d1d2d3;font:14px/1.4 Lato,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+.dqe-pop[hidden],.dqe-sug[hidden],.dqe-pop [hidden]{display:none!important}
+.dqe-hd{padding:10px 12px 0;border-bottom:1px solid #35373b}
+.dqe-top{display:flex;align-items:center;margin-bottom:8px}
+.dqe-ttl{font-weight:700;font-size:14px;color:#fff;padding-bottom:6px;border-bottom:2px solid #fff;margin-bottom:-2px}
+.dqe-x{margin-left:auto;background:none;border:0;color:#9a9b9e;font-size:20px;line-height:1;cursor:pointer;border-radius:4px;padding:0 6px}
+.dqe-x:hover{background:#ffffff1a;color:#fff}
+.dqe-srch{display:flex;align-items:center;gap:6px;height:34px;padding:0 10px;border:1px solid #565856;border-radius:8px;background:#222529;color:#9a9b9e}
+.dqe-srch:focus-within{border-color:#1d9bd1;box-shadow:0 0 0 1px #1d9bd1}
+.dqe-q{flex:1;min-width:0;background:transparent;border:0;outline:none;color:#d1d2d3;font:inherit}
+.dqe-q::placeholder{color:#9a9b9e}
+.dqe-tabs{display:flex;justify-content:space-between;padding:6px 0 0}
+.dqe-tabs.off{opacity:.45}
+.dqe-tab{flex:1;background:none;border:0;border-bottom:2px solid transparent;padding:4px 0 6px;font-size:17px;line-height:1;cursor:pointer;filter:grayscale(1);opacity:.65}
+.dqe-tab:hover{opacity:1;filter:none}
+.dqe-tab.on{filter:none;opacity:1;border-bottom-color:#1d9bd1}
+.dqe-grid{position:relative;flex:1;overflow-y:auto;padding:0 8px 6px;scrollbar-width:thin;scrollbar-color:#565856 transparent}
+.dqe-st{position:sticky;top:0;z-index:1;background:#1a1d21f2;padding:8px 4px 4px;font-size:13px;font-weight:700;color:#d1d2d3}
+.dqe-g{display:grid;grid-template-columns:repeat(auto-fill,36px);justify-content:start}
+.dqe-e{width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:none;border:0;border-radius:6px;padding:0;font-size:24px;line-height:1;cursor:pointer;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.dqe-e:hover,.dqe-e.act{background:#ffffff1f}
+.dqe-e.act{box-shadow:inset 0 0 0 2px #1d9bd1}
+.dqe-none{grid-column:1/-1;padding:24px 4px;color:#9a9b9e;text-align:center}
+.dqe-ft{display:flex;align-items:center;gap:10px;height:56px;padding:0 12px;border-top:1px solid #35373b;background:#222529}
+.dqe-prev{flex:1;min-width:0;display:flex;align-items:center;gap:10px}
+.dqe-pg{font-size:30px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.dqe-pn{display:flex;flex-direction:column;min-width:0}
+.dqe-pn b{color:#fff;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dqe-pn small{color:#9a9b9e;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dqe-tone{position:relative;display:flex;align-items:center}
+.dqe-tb,.dqe-tn{background:none;border:0;font-size:20px;line-height:1;padding:4px;border-radius:6px;cursor:pointer}
+.dqe-tb:hover,.dqe-tn:hover{background:#ffffff1f}
+.dqe-tones{position:absolute;right:-4px;bottom:calc(100% + 6px);display:flex;gap:2px;padding:4px;background:#1a1d21;border:1px solid #3d3f43;border-radius:8px;box-shadow:0 6px 18px #0009}
+.dqe-sug{position:fixed;z-index:71;max-height:320px;overflow-y:auto;background:#1a1d21;border:1px solid #3d3f43;border-radius:8px;box-shadow:0 8px 24px #000a;padding:4px 0;color:#d1d2d3;font:14px/1.4 Lato,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+.dqe-sh{padding:4px 12px 6px;font-size:12px;color:#9a9b9e;border-bottom:1px solid #35373b;margin-bottom:4px}
+.dqe-sh b{color:#d1d2d3}
+.dqe-si{display:flex;align-items:center;gap:10px;padding:5px 12px;cursor:pointer}
+.dqe-si.sel{background:#1164a3;color:#fff}
+.dqe-si b{color:#fff}
+.dqe-sg{font-size:20px;width:24px;text-align:center;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif}
+.dqe-sc{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

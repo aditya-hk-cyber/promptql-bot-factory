@@ -1,0 +1,31 @@
+/* nav module */
+.topbar .nav.nav-mod{position:relative;align-items:center;gap:2px}
+.nav-b{display:inline-flex;align-items:center;justify-content:center;width:28px;height:26px;border-radius:6px;color:#e8dde9}
+.nav-b:hover:not(:disabled),.nav-b.on{background:rgba(255,255,255,.16);color:#fff}
+.nav-b:disabled{opacity:.35;cursor:default}
+.nav-menu{position:absolute;top:32px;right:0;width:360px;max-height:70vh;overflow-y:auto;background:#222529;border:1px solid #35373b;border-radius:8px;box-shadow:0 12px 32px rgba(0,0,0,.55);padding:6px 0;z-index:40;text-align:left}
+.nav-menu[hidden]{display:none}
+.nav-mh{padding:6px 16px 4px;font-size:12px;font-weight:700;color:#9a9b9e;text-transform:uppercase;letter-spacing:.04em}
+.nav-mi{display:flex;align-items:center;gap:10px;width:100%;padding:6px 16px;text-align:left;color:#d1d2d3}
+.nav-mi:hover{background:#1264a3;color:#fff}.nav-mi:hover .nav-mi-s{color:#e6eef5}
+.nav-mi.on .nav-mi-t{color:#fff;font-weight:800}
+.nav-mi-ic{width:20px;text-align:center;flex:0 0 20px;opacity:.85}
+.nav-mi-tx{min-width:0;display:flex;flex-direction:column}
+.nav-mi-t{font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-mi-s{font-size:12px;color:#9a9b9e;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-me{padding:10px 16px;color:#9a9b9e;font-size:13px}
+.nav-hcnt{margin-left:6px;background:var(--badge);color:#2b0b2c;font-size:11px;font-weight:800;border-radius:9px;padding:0 6px}
+.nav-more .nm{color:#a593a6;font-size:13px}
+.nav-tool{color:#cdb9ce;display:inline-flex;align-items:center;padding:0 2px;border-radius:4px}
+.nav-tool:hover{color:#fff;background:rgba(255,255,255,.12)}
+.nav-tool.arm{color:#fff;background:#007a5a}
+.nav-markbar{padding:6px 12px 2px}
+.nav-markall{display:flex;align-items:center;gap:6px;width:100%;justify-content:center;padding:5px 10px;border:1px solid #5a465b;border-radius:6px;color:#e8dde9;font-size:13px}
+.nav-markall:hover{background:var(--side-hover);color:#fff}
+.nav-markall.arm{background:#007a5a;border-color:#007a5a;color:#fff}
+.nav-markall:disabled{opacity:.5}
+.nav-bp{margin:auto;text-align:center;color:var(--muted);padding:40px 24px;max-width:420px}
+.nav-bp-ic{color:#c4a2e8;margin-bottom:8px}
+.nav-bp-t{color:#fff;font-weight:900;font-size:18px;margin-bottom:6px;word-break:break-word}
+.nav-bp-s{font-size:13px;margin-bottom:12px}
+.nav-bp-a{font-size:13px}

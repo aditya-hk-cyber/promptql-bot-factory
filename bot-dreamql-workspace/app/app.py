@@ -392,9 +392,24 @@ async def artifact(thread_id: str, identifier: str, req: Request):
 
 
 # ---------------- writes (run as the visitor) ----------------
+class ArtifactRefIn(BaseModel):
+    artifact_id: str
+    version: int
+
+
+class UploadIn(BaseModel):
+    artifact_name: str
+    artifact_reference: ArtifactRefIn
+
+
 class PostIn(BaseModel):
-    text: str
+    text: str = ""
     timezone: str | None = None
+    uploads: list[UploadIn] | None = None
+
+
+def ups(body):
+    return [u.model_dump() for u in body.uploads] if body.uploads else None
 
 
 class SeenItem(BaseModel):
@@ -430,13 +445,13 @@ async def reply(thread_id: str, body: PostIn, req: Request):
     tok = vtoken(req)
     if not tok:
         return JSONResponse({"error": "Open this app from PromptQL to reply."}, status_code=401)
-    if not body.text.strip():
+    if not body.text.strip() and not body.uploads:
         return JSONResponse({"error": "Empty message"}, status_code=400)
     msg, cfg = outgoing(body.text)
     try:
-        d = await gql(tok, """mutation($t:String!,$m:String!,$tz:String!,$c:String){
-            send_thread_message(threadId:$t, message:$m, timezone:$tz, agentResponseConfig:$c){ message_id thread_event_id } }""",
-                      {"t": thread_id, "m": msg, "tz": body.timezone or "Asia/Calcutta", "c": cfg},
+        d = await gql(tok, """mutation($t:String!,$m:String!,$tz:String!,$c:String,$up:[UserUploadInput!]){
+            send_thread_message(threadId:$t, message:$m, timezone:$tz, agentResponseConfig:$c, uploads:$up){ message_id thread_event_id } }""",
+                      {"t": thread_id, "m": msg, "tz": body.timezone or "Asia/Calcutta", "c": cfg, "up": ups(body)},
                       desc="DreamQL workspace: post your reply" + (" and ask DreamBot to respond" if cfg == "force_respond" else ""))
     except Exception as e:
         return fail(e)
@@ -448,13 +463,13 @@ async def post(room_id: str, body: PostIn, req: Request):
     tok = vtoken(req)
     if not tok:
         return JSONResponse({"error": "Open this app from PromptQL to post."}, status_code=401)
-    if not body.text.strip():
+    if not body.text.strip() and not body.uploads:
         return JSONResponse({"error": "Empty message"}, status_code=400)
     msg, cfg = outgoing(body.text)
     try:
-        d = await gql(tok, """mutation($r:String!,$m:String!,$tz:String!,$c:String){
-            start_thread(roomId:$r, message:$m, timezone:$tz, agentResponseConfig:$c){ thread_id message_id } }""",
-                      {"r": room_id, "m": msg, "tz": body.timezone or "Asia/Calcutta", "c": cfg},
+        d = await gql(tok, """mutation($r:String!,$m:String!,$tz:String!,$c:String,$up:[UserUploadInput!]){
+            start_thread(roomId:$r, message:$m, timezone:$tz, agentResponseConfig:$c, uploads:$up){ thread_id message_id } }""",
+                      {"r": room_id, "m": msg, "tz": body.timezone or "Asia/Calcutta", "c": cfg, "up": ups(body)},
                       desc="DreamQL workspace: post a new message in this channel" + (" and ask DreamBot to respond" if cfg == "force_respond" else ""))
     except Exception as e:
         return fail(e)
@@ -482,9 +497,47 @@ async def seen(body: SeenIn, req: Request):
     return {"ok": True, "updated": sum(x["affected_rows"] for x in d["update_thread_participants_many"])}
 
 
+# ---------------- core v2: static modules + backend extensions ----------------
+import importlib.util
+from types import SimpleNamespace
+
+STATIC = HERE / "static"
+_SAFE_STATIC = re.compile(r"^[a-z0-9_-]+\.(js|css)$")
+
+
+@app.get("/static/{name}")
+async def static_file(name: str):
+    p = STATIC / name
+    if not _SAFE_STATIC.match(name) or not p.is_file():
+        return Response(status_code=404)
+    ct = "text/javascript; charset=utf-8" if name.endswith(".js") else "text/css; charset=utf-8"
+    return Response(p.read_bytes(), media_type=ct,
+                    headers={"X-Content-Type-Options": "nosniff", "Cache-Control": "no-cache"})
+
+
+def module_tags():
+    if not STATIC.is_dir():
+        return ""
+    files = sorted(p.name for p in STATIC.iterdir() if _SAFE_STATIC.match(p.name))
+    css = [f'<link rel="stylesheet" href="/static/{n}">' for n in files if n.endswith(".css")]
+    js = [f'<script src="/static/{n}"></script>' for n in files if n.endswith(".js")]
+    return "\n".join(css + js)
+
+
+H = SimpleNamespace(**{k: globals()[k] for k in [
+    "gql", "vtoken", "claims", "fail", "users_for", "client", "BASE", "THREAD_URL", "BOT_NAME",
+    "unread_of", "convert", "uname", "outgoing", "HERE"] if k in globals()})
+
+for _p in sorted(HERE.glob("ext_*.py")):
+    _spec = importlib.util.spec_from_file_location(_p.stem, _p)
+    _m = importlib.util.module_from_spec(_spec)
+    _spec.loader.exec_module(_m)
+    _m.register(app, H)
+
+
 @app.get("/")
 async def index():
-    return HTMLResponse((HERE / "index.html").read_text())
+    return HTMLResponse((HERE / "index.html").read_text().replace("<!--DQ_MODULES-->", module_tags()))
 
 
 if __name__ == "__main__":

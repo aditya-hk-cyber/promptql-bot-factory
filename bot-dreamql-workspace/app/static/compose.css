@@ -1,0 +1,24 @@
+/* DreamQL Workspace — compose module */
+.composer{position:relative}
+.dqc-fmt{display:flex;align-items:center;gap:2px;padding:5px 8px 3px;border-bottom:1px solid #ffffff14;border-radius:8px 8px 0 0;background:#ffffff08}
+.dqc-fb{background:none;border:0;color:var(--muted,#ababad);width:28px;height:26px;border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font:inherit;font-size:14px;line-height:1;padding:0}
+.dqc-fb:hover,.dqc-fb:focus-visible{background:#ffffff1a;color:#fff;outline:none}
+.dqc-fb b,.dqc-fb i,.dqc-fb s{font-family:Georgia,"Times New Roman",serif;font-size:15px}
+.dqc-sep{width:1px;height:16px;background:#565856;margin:0 5px}
+.dqc-menu{position:absolute;left:0;right:0;bottom:calc(100% + 6px);background:#222529;border:1px solid #565856;border-radius:8px;box-shadow:0 8px 24px #0009;max-height:300px;overflow:auto;z-index:45;padding:6px 0;font-size:14px}
+.dqc-hd{font-size:12px;font-weight:700;color:var(--muted,#ababad);padding:4px 14px 6px;text-transform:uppercase;letter-spacing:.04em}
+.dqc-it{display:flex;align-items:baseline;gap:10px;padding:6px 14px;cursor:pointer;color:var(--text,#d1d2d3);min-width:0}
+.dqc-it.sel{background:#1264a3;color:#fff}
+.dqc-nm{font-weight:700;white-space:nowrap}
+.dqc-ar{color:#ababad;white-space:nowrap}
+.dqc-it.sel .dqc-ar,.dqc-it.sel .dqc-ds{color:#ffffffcc}
+.dqc-ds{margin-left:auto;color:var(--muted,#ababad);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.composer .tb .tl.dqc-rec{color:#fff;background:#e01e5a;animation:dqc-pulse 1.2s ease-in-out infinite}
+.dqc-recbar{display:flex;align-items:center;gap:8px;padding:2px 12px 4px;font-size:12px;color:#e8798f;min-width:0}
+.dqc-dot{flex:none;width:8px;height:8px;border-radius:50%;background:#e01e5a;animation:dqc-pulse 1s ease-in-out infinite}
+.dqc-rl{flex:none;font-weight:700}
+.dqc-int{flex:1;min-width:0;color:var(--muted,#ababad);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dqc-stop{flex:none;background:none;border:1px solid #e01e5a88;color:#e8798f;border-radius:4px;padding:1px 8px;font:inherit;font-size:12px;cursor:pointer}
+.dqc-stop:hover{background:#e01e5a22}
+@keyframes dqc-pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@media (prefers-reduced-motion:reduce){.composer .tb .tl.dqc-rec,.dqc-dot{animation:none}}
